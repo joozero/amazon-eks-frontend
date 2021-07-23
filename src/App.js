@@ -41,7 +41,7 @@ function App(props) {
   const [query, setQuery] = useState('aws');
   const [search, setSearch] = useState('aws');
 
-  var url = `http://e6fb2819-default-flaskback-a1dd-1801774018.ap-southeast-1.elb.amazonaws.com/contents/${search}`
+  var url = `{backend-ingress ADDRESS}/contents/${search}`
 
   useEffect(() => {
     const fetchData = async () => {
