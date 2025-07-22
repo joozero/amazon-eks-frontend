@@ -42,7 +42,7 @@ function UpperPage() {
       }}
     >
       <ImageList
-        cols={4}
+        cols={7}
         gap={2}
         rowHeight={300}
         sx={{
