@@ -1,97 +1,91 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import UpperPage from './page/UpperPage'
+import UpperPage from './page/UpperPage';
 import axios from 'axios';
 
-import { makeStyles } from '@material-ui/core/styles';
-
-import { AppBar, Toolbar, Typography } from '@material-ui/core';
-import { Button, IconButton } from '@material-ui/core';
-import CloudIcon from '@material-ui/icons/Cloud';
-import TextField from '@material-ui/core/TextField';
-
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  searchRoot: {
-    '& > *': {
-      margin: theme.spacing(1),
-      width: '25ch',
-    },
-  },
-  bullet: {
-    display: 'inline-block',
-    margin: '0 2px',
-    transform: 'scale(0.8)',
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  title: {
-    flexGrow: 1,
-  },
-}));
+import { AppBar, Toolbar, Typography, Button, IconButton, TextField, Box } from '@mui/material';
+import CloudIcon from '@mui/icons-material/Cloud';
 
 function App(props) {
-  const classes = useStyles();
-  // const { sections } = props;
-  const [ data, setState ] = useState({outcome: []});
+  const [data, setData] = useState({ outcome: [] });
   const [query, setQuery] = useState('eks');
   const [search, setSearch] = useState('eks');
+  const [error, setError] = useState(null);
 
-  var url = `{backend-ingress ADDRESS}/contents/${search}`
+  const url = `{backend-ingress ADDRESS}/contents/${search}`;
 
   useEffect(() => {
-    const fetchData = async () => {
-      const result = await axios(url);
-      setState(result.data);
-    };
+    async function fetchData() {
+      try {
+        const result = await axios.get(url);
+        setData(result.data);
+        setError(null);
+      } catch (err) {
+        setError(err);
+        setData({ outcome: [] });
+      }
+    }
     fetchData();
-    // eslint-disable-next-line
   }, [search]);
-  
+
   return (
-    <div className={classes.root}>
-      <AppBar position="static" style={{ background: '#2E3B55' }}>
+    <Box sx={{ flexGrow: 1, p: 2 }}>
+      <AppBar position="static" sx={{ backgroundColor: '#2E3B55' }}>
         <Toolbar>
-          <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+          <IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
             <CloudIcon />
           </IconButton>
-          <Typography
-            variant="h6"
-            align="center"
-            className={classes.title}
-          >
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: 'center' }}>
             EKS DEMO Blog
           </Typography>
           {new Date().toLocaleTimeString()}
         </Toolbar>
       </AppBar>
-      <br/>
 
-      <UpperPage key={1} />
-      <br/>
-      
-      <form className={classes.searchRoot} noValidate autoComplete="off">
+      <Box sx={{ my: 2 }}>
+        <UpperPage setError={setError} />
+      </Box>
+
+      <Box
+        component="form"
+        sx={{ '& > *': { m: 1, width: '25ch' } }}
+        noValidate
+        autoComplete="off"
+        onSubmit={(e) => {
+          e.preventDefault();
+          setSearch(query.trim());
+        }}
+      >
         <TextField
           id="standard-basic"
           label="Enter your keyword to search"
+          variant="standard"
           type="text"
           value={query}
-          onChange={event => setQuery(event.target.value)}
+          onChange={(e) => setQuery(e.target.value)}
         />
-        <Button onClick={() => setSearch(query)}> Click </Button>
-      </form>
+        <Button type="submit" variant="contained" color="primary">
+          Search
+        </Button>
+      </Box>
+
+      {error && (
+        <Typography color="error" sx={{ mt: 1 }}>
+          Error loading content: {error.message}
+        </Typography>
+      )}
+
       <ul>
-      {data.outcome.map( item => (
-        <li key={item.url}>
-          <a href={item.url}>{item.title}</a><br/>
-        </li>
-      ))}
+        {data.outcome.map((item) => (
+          <li key={item.url}>
+            <a href={item.url} target="_blank" rel="noopener noreferrer">
+              {item.title}
+            </a>
+            <br />
+          </li>
+        ))}
       </ul>
-    </div>
+    </Box>
   );
 }
 
