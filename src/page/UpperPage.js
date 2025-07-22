@@ -1,81 +1,85 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-import { makeStyles } from '@material-ui/core/styles';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardActions from '@mui/material/CardActions';
 
-import { Card, CardContent, CardActions } from '@material-ui/core';
-import { GridList } from '@material-ui/core';
+import ImageList from '@mui/material/ImageList';
+import ImageListItem from '@mui/material/ImageListItem';
 
-import { Typography } from '@material-ui/core';
-import { Button } from '@material-ui/core';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    overflow: 'hidden',
-  },
-  cardRoot: {
-    maxWidth: 275,
-  },
-  gridList: {
-    flexWrap: 'nowrap',
-    transform: 'translateZ(0)',
-  }
-}));
+import Box from '@mui/material/Box';
 
 function UpperPage() {
-    const classes = useStyles();
-    const [ data, setState ] = useState({outcome:[]})
-    
-    const url = '{backend-ingress ADDRESS}/services/all'
-    
-    useEffect(() => {
-      const fetchData = async () => {
-        const result = await axios(
-          url,
-        );
-        setState(result.data);
-      };
-      
-      fetchData();
-    }, []);
-  
-    
-    return (
-      <div className={classes.root}>
-        <GridList cellHeight={300} className={classes.gridList} cols={2}>
-          {data.outcome.map( item => (
-          <div>
-            <Card className={classes.cardRoot}>        
+  const [data, setData] = useState({ outcome: [] });
+
+  const url = '{backend-ingress ADDRESS}/services/all';
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await axios.get(url);
+        setData(result.data);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+        setData({ outcome: [] });
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'space-around',
+        overflow: 'hidden',
+      }}
+    >
+      <ImageList
+        cols={4}
+        gap={2}
+        rowHeight={300}
+        sx={{
+          flexWrap: 'nowrap',
+          transform: 'translateZ(0)', // 가속 렌더링 트릭
+          width: '100%',
+        }}
+      >
+        {data.outcome.map((item, index) => (
+          <ImageListItem key={index}>
+            <Card sx={{ maxWidth: 275, m: 1 }}>
               <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  {item.name} 
+                <Typography color="text.secondary" gutterBottom>
+                  {item.name}
                 </Typography>
-                <Typography variant="body2" component="p">
-                  <img 
-                    style={{ display: 'block', margin: '0px auto' }}
+                <Typography variant="body2" component="p" sx={{ textAlign: 'center' }}>
+                  <img
                     src={item.url}
-                    height='120'
                     alt={item.name}
+                    height={120}
+                    style={{ display: 'block', margin: '0 auto' }}
                   />
-                  <br/>
+                  <br />
                   {item.value}
                 </Typography>
               </CardContent>
               <CardActions>
-                <a href={item.link}>
-                  <Button size="small"> See More </Button>
+                <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                  <Button size="small">See More</Button>
                 </a>
               </CardActions>
             </Card>
-          </div>
-          ))}
-        </GridList>
-      </div>
-    )
+          </ImageListItem>
+        ))}
+      </ImageList>
+    </Box>
+  );
 }
 
 export default UpperPage;
